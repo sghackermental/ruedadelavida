@@ -1,0 +1,919 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rueda de la Vida HackingMental</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --light-purple: #C8A2C8; /* Morado claro */
+            --dark-purple: #6A0DAD; /* Morado fuerte */
+            --bg-color: #f9f7fd;
+            --card-bg: #ffffff;
+            --text-color: #333;
+            --border-color: #e0d6f0;
+            --black: #000000;
+            --dark-purple-2: #4B0082; /* Morado oscuro */
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            padding: 20px;
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: linear-gradient(135deg, #f5f5f5 0%, #f0e6ff 100%);
+            border-radius: 15px;
+            color: white;
+            box-shadow: 0 5px 15px rgba(106, 13, 173, 0.2);
+        }
+        
+        .logo-container {
+            margin-bottom: 15px;
+        }
+        
+        .logo-placeholder {
+            width: 120px;
+            height: 120px;
+            margin: 0 auto;
+            background: linear-gradient(135deg, var(--black) 0%, var(--dark-purple-2) 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            border: 3px solid white;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        
+        h1 {
+            font-size: 2.8rem;
+            margin-bottom: 10px;
+            background: linear-gradient(to right, var(--black), var(--dark-purple-2));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 800;
+            letter-spacing: 1px;
+        }
+        
+        .description {
+            max-width: 800px;
+            margin: 0 auto 20px;
+            font-size: 1.1rem;
+            opacity: 0.9;
+            color: #333;
+            line-height: 1.7;
+        }
+        
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+        
+        .input-section {
+            flex: 1.2;
+            min-width: 300px;
+            background-color: var(--card-bg);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            max-height: 85vh;
+            overflow-y: auto;
+        }
+        
+        .chart-section {
+            flex: 0.8;
+            min-width: 300px;
+            background-color: var(--card-bg);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .section-title {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            color: var(--dark-purple);
+            border-bottom: 2px solid var(--light-purple);
+            padding-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .categories {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(500px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+        
+        .category {
+            background-color: #f5f1fc;
+            border-radius: 10px;
+            padding: 20px;
+            border-left: 5px solid var(--light-purple);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        
+        .category:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(106, 13, 173, 0.1);
+        }
+        
+        .category-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: var(--dark-purple);
+        }
+        
+        .category-focus {
+            font-size: 0.9rem;
+            color: #666;
+            margin-bottom: 15px;
+            font-style: italic;
+            padding-left: 10px;
+            border-left: 2px solid var(--light-purple);
+        }
+        
+        .aspect {
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px dashed var(--border-color);
+        }
+        
+        .aspect:last-child {
+            border-bottom: none;
+        }
+        
+        .aspect-name {
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+            color: #555;
+            line-height: 1.4;
+        }
+        
+        .slider-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 5px;
+        }
+        
+        .slider-label {
+            font-size: 0.85rem;
+            width: 70px;
+            color: #666;
+        }
+        
+        input[type="range"] {
+            flex-grow: 1;
+            height: 8px;
+            -webkit-appearance: none;
+            background: linear-gradient(to right, var(--light-purple), var(--dark-purple));
+            border-radius: 4px;
+            outline: none;
+        }
+        
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--dark-purple);
+            cursor: pointer;
+            border: 2px solid white;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        
+        .score-display {
+            width: 40px;
+            text-align: center;
+            font-weight: 600;
+            color: var(--dark-purple);
+            background-color: rgba(200, 162, 200, 0.2);
+            padding: 3px 0;
+            border-radius: 4px;
+        }
+        
+        .category-total {
+            margin-top: 15px;
+            padding-top: 10px;
+            border-top: 2px solid var(--border-color);
+            font-weight: 600;
+            color: var(--dark-purple);
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .chart-container {
+            flex-grow: 1;
+            position: relative;
+            margin: 20px 0;
+            min-height: 400px;
+        }
+        
+        .chart-legend {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9rem;
+        }
+        
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+        }
+        
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 30px;
+            position: sticky;
+            bottom: 0;
+            background-color: var(--card-bg);
+            padding: 15px 0;
+            border-radius: 10px;
+        }
+        
+        button {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        #calculateBtn {
+            background: linear-gradient(to right, var(--black), var(--dark-purple-2));
+            color: white;
+        }
+        
+        #calculateBtn:hover {
+            background: linear-gradient(to right, #333, #5a0a9a);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+        }
+        
+        #resetBtn {
+            background-color: #f0f0f0;
+            color: var(--text-color);
+        }
+        
+        #resetBtn:hover {
+            background-color: #e0e0e0;
+            transform: translateY(-2px);
+        }
+        
+        .results-summary {
+            background-color: var(--card-bg);
+            border-radius: 15px;
+            padding: 25px;
+            margin-top: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        }
+        
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 15px;
+            background-color: #f5f1fc;
+            border-radius: 8px;
+            align-items: center;
+        }
+        
+        .result-category {
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+        
+        .result-present {
+            color: var(--light-purple);
+            font-weight: 600;
+        }
+        
+        .result-future {
+            color: var(--dark-purple);
+            font-weight: 600;
+        }
+        
+        .score-info {
+            font-size: 0.8rem;
+            color: #666;
+            text-align: center;
+            margin-top: 10px;
+        }
+        
+        @media (max-width: 1300px) {
+            .container {
+                flex-direction: column;
+            }
+            
+            .input-section {
+                max-height: 70vh;
+            }
+            
+            .categories {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2.2rem;
+            }
+            
+            .category-title {
+                flex-direction: column;
+                gap: 5px;
+            }
+            
+            .slider-container {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 5px;
+            }
+            
+            .slider-label {
+                width: 100%;
+            }
+            
+            .controls {
+                flex-direction: column;
+                position: static;
+            }
+            
+            .results-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="logo-container">
+            <!-- Espacio para tu logo -->
+            <div class="logo-placeholder">TU LOGO AQUÍ</div>
+        </div>
+        <h1>Rueda de la Vida HackingMental</h1>
+        <p class="description">Evalúa tu satisfacción actual (Presente) y la que deseas alcanzar en 3 años (Futuro) en cada una de las 12 áreas vitales, siendo 1 nada satisfecho y 10 muy satisfecho.</p>
+    </div>
+    
+    <div class="container">
+        <div class="input-section">
+            <h2 class="section-title">Evaluación de las 12 Áreas Vitales</h2>
+            
+            <div class="categories" id="categoriesContainer">
+                <!-- Las categorías se generarán dinámicamente con JavaScript -->
+            </div>
+            
+            <div class="controls">
+                <button id="calculateBtn">Calcular Rueda de la Vida</button>
+                <button id="resetBtn">Reiniciar Valores</button>
+            </div>
+            
+            <div class="score-info">
+                <strong>Escala:</strong> 1 = Nada satisfecho | 10 = Muy satisfecho
+            </div>
+        </div>
+        
+        <div class="chart-section">
+            <h2 class="section-title">Tu Rueda de la Vida HackingMental</h2>
+            
+            <div class="chart-container">
+                <canvas id="lifeWheelChart"></canvas>
+            </div>
+            
+            <div class="chart-legend">
+                <div class="legend-item">
+                    <div class="legend-color" style="background-color: #C8A2C8;"></div>
+                    <span>Presente</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background-color: #6A0DAD;"></div>
+                    <span>Futuro (3 años)</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="results-summary">
+        <h2 class="section-title">Resumen de Resultados por Área</h2>
+        <div class="results-grid" id="resultsGrid">
+            <!-- Los resultados se generarán dinámicamente con JavaScript -->
+        </div>
+    </div>
+
+    <script>
+        // Datos de las 12 áreas vitales basadas en la descripción del usuario
+        const lifeCategories = [
+            {
+                id: 'health',
+                name: '1. Salud y Forma Física',
+                focus: 'Enfoque: Energía, vitalidad, imagen corporal y nutrición.',
+                aspects: [
+                    'Me despierto con energía y vitalidad casi todos los días.',
+                    'Estoy satisfecho con mi peso y composición corporal actual.',
+                    'Mi dieta nutre mi cuerpo y me hace sentir bien después de comer.',
+                    'Realizo actividad física constante que disfruto y me fortalece.',
+                    'Descanso profundamente y siento que duermo las horas necesarias.',
+                    'Tengo un sistema inmunológico fuerte y rara vez me enfermo.',
+                    'Me siento orgulloso de lo que veo cuando me miro al espejo.'
+                ],
+                presentTotal: 0,
+                futureTotal: 0
+            },
+            {
+                id: 'intellectual',
+                name: '2. Vida Intelectual',
+                focus: 'Enfoque: Aprendizaje, estimulación mental y pensamiento crítico.',
+                aspects: [
+                    'Dedico tiempo regularmente a aprender cosas nuevas y desafiar mi mente.',
+                    'Tengo el hábito de la lectura o el estudio profundo de temas que me interesan.',
+                    'Soy capaz de concentrarme intensamente sin distraerme fácilmente.',
+                    'Me considero una persona curiosa y abierta a nuevas ideas.',
+                    'Utilizo mi inteligencia para resolver problemas de vida de manera efectiva.',
+                    'Estoy satisfecho con mi nivel actual de conocimientos y cultura general.',
+                    'Mi mente es mi aliada y tengo pensamientos claros y constructivos.'
+                ],
+                presentTotal: 0,
+                futureTotal: 0
+            },
+            {
+                id: 'emotional',
+                name: '3. Vida Emocional',
+                focus: 'Enfoque: Inteligencia emocional, felicidad base y manejo del estrés.',
+                aspects: [
+                    'Tengo un nivel base de felicidad alto la mayor parte del tiempo.',
+                    'Soy capaz de identificar y gestionar mis emociones negativas rápidamente.',
+                    'Me siento en paz conmigo mismo y con mi pasado.',
+                    'Manejo el estrés y la presión sin colapsar ni reaccionar exageradamente.',
+                    'Expreso mis sentimientos de manera saludable y oportuna.',
+                    'Siento gratitud diaria por las cosas simples de mi vida.',
+                    'Mis emociones trabajan a mi favor, no en mi contra.'
+                ],
+                presentTotal: 0,
+                futureTotal: 0
+            },
+            {
+                id: 'character',
+                name: '4. Carácter',
+                focus: 'Enfoque: Autoestima, integridad, disciplina y valores.',
+                aspects: [
+                    'Confío plenamente en mí mismo y en mi capacidad de lograr lo que me propongo.',
+                    'Cumplo las promesas que me hago a mí mismo (autodisciplina).',
+                    'Actúo con integridad incluso cuando nadie me está viendo.',
+                    'Tengo claros mis valores y vivo en congruencia con ellos.',
+                    'Soy capaz de superar mis miedos para tomar acción.',
+                    'Me siento orgulloso de la persona que soy hoy.',
+                    'Asumo total responsabilidad por mis actos y resultados, sin culpar a otros.'
+                ],
+                presentTotal: 0,
+                futureTotal: 0
+            },
+            {
+                id: 'spiritual',
+                name: '5. Vida Espiritual',
+                focus: 'Enfoque: Propósito, conexión y paz interior.',
+                aspects: [
+                    'Siento una conexión profunda con algo más grande que yo (universo, dios, naturaleza).',
+                    'Tengo claro cuál es mi propósito o misión en esta vida.',
+                    'Dedico tiempo a prácticas espirituales (meditación, oración, reflexión) regularmente.',
+                    'Siento una paz interior profunda independientemente de las circunstancias externas.',
+                    'No tengo miedo a la muerte y entiendo mi lugar en el ciclo de la vida.',
+                    'Vivo el momento presente sin angustiarme excesivamente por el futuro.',
+                    'Mis creencias espirituales me empoderan y me dan fuerza diaria.'
+                ],
+                presentTotal: 0,
+                futureTotal: 0
+            },
+            {
+                id: 'love',
+                name: '6. Relaciones Amorosas',
+                focus: 'Enfoque: Pasión, romance e intimidad.',
+                aspects: [
+                    'Siento una conexión profunda, íntima y apasionada con mi pareja (o conmigo mismo si estoy soltero).',
+                    'Existe una comunicación abierta, honesta y respetuosa en mi vida romántica.',
+                    'Me siento plenamente amado/a y valorado/a tal como soy.',
+                    'La pasión y la atracción física están vivas y son satisfactorias.',
+                    'Tengo claridad sobre lo que quiero y necesito en una relación de pareja.',
+                    'Manejamos los conflictos de manera constructiva y madura.',
+                    'Mi vida amorosa me da energía en lugar de quitármela.'
+                ],
+                presentTotal: 0,
+                futureTotal: 0
+            },
+            {
+                id: 'parenting',
+                name: '7. Crianza (Parenting)',
+                focus: 'Enfoque: Relación con hijos y legado.',
+                aspects: [
+                    'Tengo una visión clara de los valores que quiero transmitir a mis hijos.',
+                    'Paso tiempo de calidad real y sin distracciones con ellos.',
+                    'Me comunico con ellos desde el amor y la paciencia, no desde el miedo.',
+                    'Soy un ejemplo positivo y congruente para ellos.',
+                    'Disfruto genuinamente mi rol de padre/madre/mentor.',
+                    'Fomento su independencia y autoestima de manera efectiva.',
+                    'Estoy satisfecho con la profundidad de nuestra conexión emocional.'
+                ],
+                presentTotal: 0,
+                futureTotal: 0
+            },
+            {
+                id: 'social',
+                name: '8. Vida Social',
+                focus: 'Enfoque: Amistades, comunidad y diversión social.',
+                aspects: [
+                    'Tengo un círculo de amigos cercanos en los que confío plenamente.',
+                    'Mis amistades me inspiran, me apoyan y me hacen crecer.',
+                    'Dedico tiempo suficiente a socializar y divertirme con otros.',
+                    'Soy selectivo con mi entorno y evito personas tóxicas.',
+                    'Me siento cómodo conociendo gente nueva y creando conexiones.',
+                    'Siento que pertenezco a una comunidad que me valora.',
+                    'Soy un buen amigo y aporto valor a la vida de los demás.'
+                ],
+                presentTotal: 0,
+                futureTotal: 0
+            },
+            {
+                id: 'career',
+                name: '9. Carrera Profesional',
+                focus: 'Enfoque: Trabajo, satisfacción laboral y crecimiento profesional.',
+                aspects: [
+                    'Me apasiona lo que hago y disfruto mi trabajo la mayor parte del tiempo.',
+                    'Siento que mi trabajo aporta valor real al mundo o a otros.',
+                    'Estoy satisfecho con mi nivel de competencia y habilidad profesional.',
+                    'Tengo oportunidades claras de crecimiento y expansión en mi carrera.',
+                    'Mi trabajo está alineado con mis talentos naturales y fortalezas.',
+                    'Me siento justamente recompensado y reconocido por mi labor.',
+                    'Tengo un equilibrio saludable entre mi carrera y mi vida personal.'
+                ],
+                presentTotal: 0,
+                futureTotal: 0
+            },
+            {
+                id: 'finance',
+                name: '10. Vida Financiera',
+                focus: 'Enfoque: Ingresos, administración, ahorro y libertad financiera.',
+                aspects: [
+                    'Mis ingresos actuales son suficientes para cubrir mis deseos y necesidades.',
+                    'Tengo control total sobre mis gastos y sé a dónde va mi dinero.',
+                    'Tengo un fondo de ahorro o emergencia que me da tranquilidad.',
+                    'Mis inversiones están creciendo y trabajando para mi futuro.',
+                    'Tengo una mentalidad de abundancia y no sufro estrés por dinero.',
+                    'Tengo un plan claro para lograr mi libertad financiera.',
+                    'El dinero es una herramienta de libertad en mi vida, no un obstáculo.'
+                ],
+                presentTotal: 0,
+                futureTotal: 0
+            },
+            {
+                id: 'quality',
+                name: '11. Calidad de Vida',
+                focus: 'Enfoque: Entorno físico, hogar, viajes, posesiones y experiencias.',
+                aspects: [
+                    'Mi hogar es mi santuario: está ordenado, limpio y me inspira.',
+                    'Estoy satisfecho con las posesiones materiales que tengo (auto, ropa, tecnología).',
+                    'Dedico tiempo y recursos a viajar y vivir nuevas experiencias.',
+                    'Me doy gustos y lujos que son importantes para mí sin culpa.',
+                    'Mi entorno diario (oficina, barrio, ciudad) apoya mi bienestar.',
+                    'Disfruto de tiempo libre de calidad para mis hobbies y recreación.',
+                    'Siento que mi estilo de vida refleja mi éxito y esfuerzo.'
+                ],
+                presentTotal: 0,
+                futureTotal: 0
+            },
+            {
+                id: 'vision',
+                name: '12. Visión de Vida',
+                focus: 'Enfoque: Claridad futura, congruencia global y sentido de dirección.',
+                aspects: [
+                    'Tengo una visión clara y emocionante de cómo quiero que sea mi vida en 5 años.',
+                    'Mis acciones diarias están alineadas con mis metas a largo plazo.',
+                    'Siento que soy el autor y creador de mi propia vida, no una víctima.',
+                    'Tengo un plan de vida equilibrado que no sacrifica un área por otra.',
+                    'Me siento entusiasmado por levantarme cada mañana.',
+                    'Siento que estoy progresando constantemente hacia mi vida ideal.',
+                    'Si muriera hoy, estaría satisfecho con la vida que he diseñado y vivido.'
+                ],
+                presentTotal: 0,
+                futureTotal: 0
+            }
+        ];
+
+        // Referencias a elementos DOM
+        let categoriesContainer = document.getElementById('categoriesContainer');
+        let resultsGrid = document.getElementById('resultsGrid');
+        let calculateBtn = document.getElementById('calculateBtn');
+        let resetBtn = document.getElementById('resetBtn');
+        let lifeWheelChart = null;
+
+        // Función para generar los controles de entrada
+        function generateInputs() {
+            categoriesContainer.innerHTML = '';
+            
+            lifeCategories.forEach((category, categoryIndex) => {
+                const categoryElement = document.createElement('div');
+                categoryElement.className = 'category';
+                categoryElement.id = `category-${category.id}`;
+                
+                let aspectsHTML = '';
+                category.aspects.forEach((aspect, aspectIndex) => {
+                    const aspectId = `${category.id}-aspect-${aspectIndex}`;
+                    const presentId = `${aspectId}-present`;
+                    const futureId = `${aspectId}-future`;
+                    
+                    aspectsHTML += `
+                    <div class="aspect">
+                        <div class="aspect-name">${aspect}</div>
+                        <div class="slider-container">
+                            <span class="slider-label">Presente:</span>
+                            <input type="range" min="1" max="10" value="1" class="present-slider" id="${presentId}" data-category="${category.id}" data-aspect="${aspectIndex}">
+                            <span class="score-display" id="${presentId}-value">1</span>
+                        </div>
+                        <div class="slider-container">
+                            <span class="slider-label">Futuro (3 años):</span>
+                            <input type="range" min="1" max="10" value="5" class="future-slider" id="${futureId}" data-category="${category.id}" data-aspect="${aspectIndex}">
+                            <span class="score-display" id="${futureId}-value">5</span>
+                        </div>
+                    </div>
+                    `;
+                });
+                
+                categoryElement.innerHTML = `
+                    <div class="category-title">${category.name}</div>
+                    <div class="category-focus">${category.focus}</div>
+                    ${aspectsHTML}
+                    <div class="category-total">
+                        <span>Promedio por área:</span>
+                        <span><span id="${category.id}-present-avg">1.0</span> / <span id="${category.id}-future-avg">5.0</span></span>
+                    </div>
+                `;
+                
+                categoriesContainer.appendChild(categoryElement);
+                
+                // Agregar event listeners a los sliders
+                category.aspects.forEach((aspect, aspectIndex) => {
+                    const presentId = `${category.id}-aspect-${aspectIndex}-present`;
+                    const futureId = `${category.id}-aspect-${aspectIndex}-future`;
+                    
+                    document.getElementById(presentId).addEventListener('input', function() {
+                        updateSliderValue(this.id, this.value);
+                        updateCategoryTotals(category.id);
+                    });
+                    
+                    document.getElementById(futureId).addEventListener('input', function() {
+                        updateSliderValue(this.id, this.value);
+                        updateCategoryTotals(category.id);
+                    });
+                });
+            });
+            
+            // Inicializar los totales de categoría
+            lifeCategories.forEach(category => {
+                // Inicializar con valores por defecto (1 para presente, 5 para futuro)
+                category.presentTotal = 7; // 7 aspectos * 1 = 7
+                category.futureTotal = 35; // 7 aspectos * 5 = 35
+                updateCategoryTotals(category.id);
+            });
+        }
+
+        // Actualizar el valor mostrado del slider
+        function updateSliderValue(sliderId, value) {
+            const valueElement = document.getElementById(`${sliderId}-value`);
+            if (valueElement) {
+                valueElement.textContent = value;
+            }
+        }
+
+        // Actualizar totales y promedios de una categoría
+        function updateCategoryTotals(categoryId) {
+            const category = lifeCategories.find(c => c.id === categoryId);
+            if (!category) return;
+            
+            let presentSum = 0;
+            let futureSum = 0;
+            const aspectCount = category.aspects.length;
+            
+            // Calcular sumas
+            for (let i = 0; i < aspectCount; i++) {
+                const presentSlider = document.getElementById(`${categoryId}-aspect-${i}-present`);
+                const futureSlider = document.getElementById(`${categoryId}-aspect-${i}-future`);
+                
+                if (presentSlider && futureSlider) {
+                    presentSum += parseInt(presentSlider.value);
+                    futureSum += parseInt(futureSlider.value);
+                }
+            }
+            
+            // Actualizar datos en el objeto
+            category.presentTotal = presentSum;
+            category.futureTotal = futureSum;
+            
+            // Calcular promedios (entre 1 y 10)
+            const presentAvg = (presentSum / aspectCount).toFixed(1);
+            const futureAvg = (futureSum / aspectCount).toFixed(1);
+            
+            // Actualizar UI
+            const presentAvgElement = document.getElementById(`${categoryId}-present-avg`);
+            const futureAvgElement = document.getElementById(`${categoryId}-future-avg`);
+            
+            if (presentAvgElement) presentAvgElement.textContent = presentAvg;
+            if (futureAvgElement) futureAvgElement.textContent = futureAvg;
+        }
+
+        // Calcular y mostrar la rueda de la vida
+        function calculateLifeWheel() {
+            const categoryNames = lifeCategories.map(c => c.name.replace(/^\d+\.\s*/, ''));
+            const presentAverages = lifeCategories.map(c => parseFloat((c.presentTotal / c.aspects.length).toFixed(1)));
+            const futureAverages = lifeCategories.map(c => parseFloat((c.futureTotal / c.aspects.length).toFixed(1)));
+            
+            // Actualizar resultados en la cuadrícula
+            updateResultsGrid(presentAverages, futureAverages);
+            
+            // Crear o actualizar el gráfico
+            const ctx = document.getElementById('lifeWheelChart').getContext('2d');
+            
+            if (lifeWheelChart) {
+                lifeWheelChart.destroy();
+            }
+            
+            lifeWheelChart = new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: categoryNames,
+                    datasets: [
+                        {
+                            label: 'Presente',
+                            data: presentAverages,
+                            backgroundColor: 'rgba(200, 162, 200, 0.2)',
+                            borderColor: '#C8A2C8',
+                            borderWidth: 2,
+                            pointBackgroundColor: '#C8A2C8',
+                            pointBorderColor: '#fff',
+                            pointBorderWidth: 2,
+                            pointRadius: 4
+                        },
+                        {
+                            label: 'Futuro (3 años)',
+                            data: futureAverages,
+                            backgroundColor: 'rgba(106, 13, 173, 0.2)',
+                            borderColor: '#6A0DAD',
+                            borderWidth: 2,
+                            pointBackgroundColor: '#6A0DAD',
+                            pointBorderColor: '#fff',
+                            pointBorderWidth: 2,
+                            pointRadius: 4
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    scales: {
+                        r: {
+                            angleLines: {
+                                display: true,
+                                color: 'rgba(0, 0, 0, 0.1)'
+                            },
+                            suggestedMin: 0,
+                            suggestedMax: 10,
+                            ticks: {
+                                stepSize: 2,
+                                backdropColor: 'transparent',
+                                font: {
+                                    size: 11
+                                }
+                            },
+                            pointLabels: {
+                                font: {
+                                    size: 11,
+                                    weight: '600'
+                                },
+                                color: '#555'
+                            },
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.05)'
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `${context.dataset.label}: ${context.raw}/10`;
+                                }
+                            }
+                        }
+                    },
+                    elements: {
+                        line: {
+                            tension: 0.1
+                        }
+                    }
+                }
+            });
+        }
+
+        // Actualizar la cuadrícula de resultados
+        function updateResultsGrid(presentAverages, futureAverages) {
+            resultsGrid.innerHTML = '';
+            
+            lifeCategories.forEach((category, index) => {
+                const presentScore = presentAverages[index];
+                const futureScore = futureAverages[index];
+                const improvement = (futureScore - presentScore).toFixed(1);
+                
+                const resultElement = document.createElement('div');
+                resultElement.className = 'result-item';
+                
+                resultElement.innerHTML = `
+                    <span class="result-category">${category.name.replace(/^\d+\.\s*/, '')}</span>
+                    <div>
+                        <span class="result-present">${presentScore}/10</span> → 
+                        <span class="result-future">${futureScore}/10</span>
+                        ${improvement > 0 ? `<span style="color: #4CAF50; font-size: 0.8rem; margin-left: 5px;">(+${improvement})</span>` : ''}
+                    </div>
+                `;
+                
+                resultsGrid.appendChild(resultElement);
+            });
+        }
+
+        // Reiniciar todos los valores a los predeterminados
+        function resetAllValues() {
+            lifeCategories.forEach(category => {
+                category.aspects.forEach((aspect, aspectIndex) => {
+                    const presentSlider = document.getElementById(`${category.id}-aspect-${aspectIndex}-present`);
+                    const futureSlider = document.getElementById(`${category.id}-aspect-${aspectIndex}-future`);
+                    
+                    if (presentSlider) {
+                        presentSlider.value = 1;
+                        updateSliderValue(presentSlider.id, 1);
+                    }
+                    
+                    if (futureSlider) {
+                        futureSlider.value = 5;
+                        updateSliderValue(futureSlider.id, 5);
+                    }
+                });
+                
+                updateCategoryTotals(category.id);
+            });
+            
+            calculateLifeWheel();
+        }
+
+        // Inicializar la aplicación
+        document.addEventListener('DOMContentLoaded', function() {
+            generateInputs();
+            calculateLifeWheel();
+            
+            // Event listeners para los botones
+            calculateBtn.addEventListener('click', calculateLifeWheel);
+            resetBtn.addEventListener('click', resetAllValues);
+        });
+    </script>
+</body>
+</html>
